@@ -1,0 +1,225 @@
+---
+title: 'Proposition 27: Allow Online Sports Betting'
+author: "Geyang Guo, Xinwei Song, Siyu Liu"
+date: "2022.10.24"
+geometry: "left=2cm,right=2cm,top=2cm,bottom=2cm"
+output:
+  prettydoc::html_pretty:
+    theme: cayman 
+    highlight: github
+    toc: yes
+---
+
+```{=html}
+<style type="text/css">
+h1 { /* Header 1 */
+  font-size: 28px;
+}
+h2 { /* Header 2 */
+    font-size: 20px;
+}
+</style>
+<table><tr><td bgcolor=#FFFFF0>
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo=FALSE, #是否在输出中包含源代码
+  results="markup", #装裱markup、原样asis、隐藏hide、末尾hold
+  warning=FALSE,#是否在输出中包含警告(default = TRUE)
+  error=FALSE, #是否在输出中包含错误信息
+  message=FALSE, #是否在输出中包含参考的信息
+  split=FALSE, #是否将R的输出分割成单独的文件
+  fig.width=8, #可以用%表示
+  fig.height=6, #图片文件的宽、高(英寸2.54cm 为单位)
+  fig.align="center" #对齐方式，不做调节(‘default’)、左(‘left’)、右(‘right’)、居中(‘center’)
+  # interval=1 #动画参数，切换画面时间，单位为秒
+)
+```
+
+```{r results='hide', message=FALSE, warning=FALSE}
+library(maps)
+library(ggplot2)
+library(plotly)
+library(reshape2)
+library(ggbump)
+```
+
+# 1. How will Online Sports Betting go?
+
+## 1.1 What is the population of each state?
+
+```{r, fig.align='center', fig.width=6, fig.height=4}
+path<-'D:/GloablStudyProgram/visualization/PopulationStates.csv'
+df<-read.csv(path)
+df$hover<-with(df,X0)
+l <- list(color = toRGB("white"), width = 2)
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+fig<-plot_geo(df,locationmode='USA-states')
+fig<-fig%>%add_trace(
+  locations=~X,
+  z=~X0,
+  text=~hover,
+  colorscale='Reds'
+)
+fig <- fig %>% colorbar(title = "Total Capacity")
+fig <- fig %>% layout(
+  title = 'Population by State',
+  geo = g
+)
+fig
+```
+
+## 1.2 How passionate are Californians about sports gambling in terms of the number of stadiums?
+
+```{r, fig.align='center', fig.width=6, fig.height=4}
+path<-'D:/GloablStudyProgram/visualization/stadium.csv'
+df<-read.csv(path)
+
+df$hover<-with(df,X0)
+l <- list(color = toRGB("white"), width = 2)
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+fig<-plot_geo(df,locationmode='USA-states')
+fig<-fig%>%add_trace(
+  locations=~X,
+  z=~X0,
+  text=~hover,
+  colorscale='Reds'
+)
+fig <- fig %>% colorbar(title = "Total Capacity")
+fig <- fig %>% layout(
+  title = 'Stadium Capacity by State',
+  geo = g
+)
+fig
+```
+
+## 1.3 How passionate are Californians about sports gambling in terms of the number of teams?
+
+```{r, fig.align='center',fig.width=6, fig.height=4}
+path<-'D:/GloablStudyProgram/visualization/team.csv'
+df<-read.csv(path)
+df$hover<-with(df,X0)
+l <- list(color = toRGB("white"), width = 2)
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+fig<-plot_geo(df,locationmode='USA-states')
+fig<-fig%>%add_trace(
+  locations=~X,
+  z=~X0,
+  text=~hover,
+  colorscale='Reds'
+)
+fig <- fig %>% colorbar(title = "Team Number")
+fig <- fig %>% layout(
+  title = 'Professional Sport Team Numbers by State',
+  geo = g
+)
+fig
+```
+
+## 1.4 The similarity between CA and the other states in terms of population, stadium capacity and the number of profession sport teams. 
+
+```{r,aligh='left', width=6, height=4}
+path<-'D:/GloablStudyProgram/visualization/similarity.csv'
+df<-read.csv(path,header=T)
+library(rgl)
+library(rvest)
+library(scatterplot3d)
+library(graph3d)
+df$color<-numeric(nrow(df))
+
+df[5,5]<-1
+#数据
+#'royalblue1',
+
+
+
+mycolors <- c('royalblue1')
+df$color <- mycolors[ as.numeric(df$color) ]
+df[5,5]<-"red"
+df[45,5]<-"green"
+df[10,5]<-"blue"
+df[35,5]<-"yellow"
+df[39,5]<-"pink"
+df[36,5]<-"black"
+
+#绘制
+plot3d( 
+  x=df$stadium, y=df$TEAM, z=df$Population, 
+  col = df$color, 
+  type = 's', 
+  radius = .1,
+  xlab="Stadium", ylab="Team", zlab="Population")
+legend3d("topright", legend = c("CA", "TX", "FL", "NY", "PA", "OH"), pch = 10,bty=1, col = c("red","green","blue","yellow","pink", "black")  , cex=0.6)
+rglwidget()
+```
+By considering the three characteristics of online sports betting, we visualized the related data of different states in the United States after normalization, and obtained the similarity between different states by calculating the cosine similarity. The closest state we found to California was Florida.<br>
+In addition, we also find that the cosine similarity of the states closest to California is close to 1, which means that they have a strong linear relationship. In other words, we can estimate the relevant fiscal revenue of California by linear weighting.
+
+
+# 2. Could Online Sports Betting influence current state of the homeless?
+
+## 2.1 What about revenues in states that have opened online gambling?
+
+```{r, echo=FALSE , out.width="50%",fig.width=6, fig.height=4}
+knitr::include_graphics("D:/GloablStudyProgram/visualization/income.gif")
+
+path<-'D:/GloablStudyProgram/visualization/bubble.csv'
+df<-read.csv(path,header=T)
+
+library('ggplot2')
+q<-ggplot(df,aes(x=stadium,y=team))+
+  geom_point(aes(size=population,color=income),alpha=0.6)+
+  scale_size(range=c(1,12))+
+  theme_bw()+
+  geom_text(aes(label = state, size = 7), nudge_y = 0.7)
+
+ggplotly(q)
+```
+
+## 2.2 What is the current state of homeless people in California?
+
+```{r, fig.align='center',fig.width=6, fig.height=4}
+homeless<-read.csv('D:/GloablStudyProgram/visualization/homeless.csv')
+homeless<-melt(homeless,id.vars = 'year')
+homeless$year<-as.character(homeless$year)
+p<-ggplot(homeless,aes(year,value,fill=variable))+
+  geom_bar(stat='identity',position = 'stack', width=0.4)+
+  scale_fill_manual(values = c("#8c510a", "#d8b365"))+
+  labs(x="Year",y='Population')+
+  scale_y_continuous(expand = c(0,0))
+ggplotly(p)
+```
+
+## 2.3 How will Online Sports Betting influence current state of the homeless in California?
+
+Based on our consideration of the similarity of online sports betting related indicators among states in the United States, and the fiscal revenue of states that have allowed online sports betting in the United States, we estimate that the fiscal revenue of California after opening online sports betting will increase by approximately $86111,951.<br>
+However, due to the increase of uncertainties such as the COVID-19 pandemic, California may not reach the estimated fiscal revenue in the first few months of online sports betting, and there may be some fluctuations, but we estimate that California's fiscal revenue will increase by at least $50,912,978.
+
+# 3. Analysis & Conclusion
+
+-   Based on related research, there are many factors contributing to allow online sports betting in 2022. The most main reasons come from the huge number of the homeless in California than before and sports enthusiasm the citizens have.
+
+-   Our conclusions are based on data from these two aspects:
+
+-   Firstly, we believe that whether or not to allow this proposition is related to **local sports activism**. Therefore, we depict the number of stadiums and teams nationwide using the chromaticity diagram, and from which we conclude that California ranks top among the nation\'s sports followers. We speculate that liberalizing online sports betting would generate significant tax revenue for the government on one hand and cater to voter activism on the other.
+
+-   Secondly, we turn our attention to the urgent problem that solving the **homeless housing**. Since the outbreak of academic, the number of homeless people in California has surged heavily, which added a heavy burden on society and increased social instability. However, by subsidizing their housing with taxes collecting from online sports betting, this hazard would be greatly alleviated.
+
+-   Finally, based on the above indicators, we compare the **similarity** of online gambling situation between other states and California, and estimate the possible economic benefits of opening up online gambling in California, contributing to help with the situation of homeless people in California.
+
+-   So it is time for California to join in!
